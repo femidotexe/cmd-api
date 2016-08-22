@@ -26,7 +26,7 @@ rl.question('What is your medium token ', (token) => {
             var id = body.data.id;
             console.log('\n\nWelcome '+body.data.name+'('+body.data.username+') to cmd version of medium\n');
             console.log('\nTo create a post enter 1');
-            console.log('\nTo  enter 2');
+            console.log('\nTo get list of publications enter 2');
             console.log('');
             rl.question('What is your choice ', (action) => {
                 if(action === 1) {
@@ -59,6 +59,16 @@ rl.question('What is your medium token ', (token) => {
                                 rl.close();
                             })
                         })
+                    })
+                } else if(action == 2) {
+                    req({
+                        'url':'https://api.medium.com/v1/users/'+id+'/publications', 
+                        headers: {
+                            'User-Agent': 'request',
+                            'Authorization': 'Bearer '+token
+                        }
+                    }, function(err, resp, body) {
+                        console.log(body);
                     })
                 }
             })
