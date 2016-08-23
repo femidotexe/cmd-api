@@ -7,7 +7,6 @@ var rl = readline.createInterface({
 });
 
 
-
 rl.question('Please enter your medium token ', function(token) {
     if (token.trim() === '') {
         console.log('Please enter a valid token');
@@ -46,6 +45,7 @@ rl.question('Please enter your medium token ', function(token) {
                                     }
                                 });
                             }
+                            rl.close();
                         });
                     } else if (choice == 2){
                         rl.question('What\'s your bing subsription key ', function(key) {
@@ -55,8 +55,10 @@ rl.question('Please enter your medium token ', function(token) {
                         rl.question('Enter title ', function(title) {
                             rl.question('Enter content ', function(content) {
                                 medium.postToMedium(content, title, authorId, token);
+                                rl.close();
                             })
                         })
+                        
                     }
                 })
                 
