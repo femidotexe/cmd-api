@@ -31,18 +31,32 @@ rl.question('Please enter your medium token ', function(token) {
                 console.log('Hi '+body.data.name+'('+body.data.username+'). Your medium url is: '+body.data.url+'\n\n');
                 var authorId = body.data.id;
 
-                console.log('To post game of thrones quotes to medium, Enter 1\nTo view publications, enter 2\nTo make a custom post, enter 3');
+                console.log('To post game of thrones quotes to medium, Enter 1\nTo post current bing news, enter 2\nTo make a custom post, enter 3');
 
                 rl.question('Enter your choice ', function(choice) {
                     if (choice == 1) {
                         rl.question('Enter number of game of thrones quotes you want ', function(numberOfQuotes) {
+                            var content = '';
                             while(numberOfQuotes--) {
                                 req('https://got-quotes.herokuapp.com/quotes', function(err, res, body) {
                                     var quoteDetails = JSON.parse(body);
-                                    medium.postToMedium(quoteDetails.quote, quoteDetails.character, authorId, token);
+                                    content += '<h3>'+quoteDetails.character+'</h3><br/>'+quoteDetails.quote+'<br/><br/>';
+                                    if (numberOfQuotes < 1) {
+                                        medium.postToMedium(content, 'Game of Thrones quotes', authorId, token);
+                                    }
                                 });
                             }
                         });
+                    } else if (choice == 2){
+                        rl.question('What\'s your bing subsription key ', function(key) {
+                            medium.getBingNews(key, authorId, token);
+                        });
+                    }else if (choice == 3) {
+                        rl.question('Enter title ', function(title) {
+                            rl.question('Enter content ', function(content) {
+                                medium.postToMedium(content, title, authorId, token);
+                            })
+                        })
                     }
                 })
                 
@@ -54,6 +68,25 @@ rl.question('Please enter your medium token ', function(token) {
 class Medium {
     constructor() {
 
+    }
+    getBingNews(key, authorId, token) {
+        var jsonresponse;
+        var instance = this;
+        req.get({
+           'url':'https://api.cognitive.microsoft.com/bing/v5.0/news/',
+            headers:{
+                'Ocp-Apim-Subscription-Key':key
+            }
+        }, function(err, response, body) {
+            var news = JSON.parse(body);
+            news = news.value;
+            var content = ''
+            for (var i = 0; i < news.length && i < 10; i++) {
+                content += '<img width="'+news[i].image.thumbnail.width+'" height="'+news[i].image.thumbnail.height+'" src="'+news[i].image.thumbnail.contentUrl+'"/><h1>'+news[i].name+'</h1><br/>'+news[i].description+'<br/><a href="'+news[i].url+'">Read More</a><br/>';
+            }
+            instance.postToMedium(content, 'Current News', authorId, token);
+        });
+        
     }
 
     postToMedium(content, title, authorId, token) {
